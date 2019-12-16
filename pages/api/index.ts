@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import { ApolloServer, gql } from "apollo-server-micro";
 import { importSchema } from "graphql-import";
 import { Resolvers } from "../../gen/types";
@@ -5,14 +6,22 @@ import { Resolvers } from "../../gen/types";
 const typeDefs = importSchema("./graphql/schema.graphql");
 
 // ここからGraphQLのモックの定義
+async function fetchUsers() {
+  const res = await fetch(`https://qiita.com/api/v2/items?page=1&per_page=100`);
+  return res.json();
+}
+
 const resolvers: Resolvers = {
   Query: {
-    users: () => [
-      {
-        id: 1,
-        name: "hogege"
-      }
-    ]
+    async users() {
+      const res = await fetchUsers();
+      return res.map(e => {
+        return {
+          id: e.id,
+          name: e.user.name
+        };
+      });
+    }
   }
 };
 
