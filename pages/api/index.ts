@@ -2,6 +2,8 @@ import fetch from "node-fetch";
 import { ApolloServer, gql } from "apollo-server-micro";
 import { importSchema } from "graphql-import";
 import { Resolvers } from "../../gen/types";
+import { authorized } from "../../graphql/context";
+import jwt from "jsonwebtoken";
 
 const typeDefs = importSchema("./graphql/schema.graphql");
 
@@ -13,19 +15,50 @@ async function fetchUsers() {
 
 const resolvers: Resolvers = {
   Query: {
-    async users() {
-      const res = await fetchUsers();
-      return res.map(e => {
-        return {
-          id: e.id,
-          name: e.user.name
-        };
+    users(_obj, args, context) {
+      return authorized(context)(async auth => {
+        console.log("*****************");
+        console.log(auth);
+        console.log("*****************");
+        const res = await fetchUsers();
+        return res.map(e => {
+          return {
+            id: e.id,
+            name: e.user.name
+          };
+        });
       });
     }
   }
 };
 
-const apolloServer = new ApolloServer({ typeDefs, resolvers });
+const authHeaderRegex = /^Bearer (.+)/;
+
+export function decode(token: string) {
+  const decoded = jwt.decode(token);
+  if (!decoded) {
+    return null;
+  }
+  const data = JSON.parse(decoded.sub);
+  const auth = {
+    id: data["id"],
+    token: token
+  };
+  return auth;
+}
+
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => {
+    const authHeader: string = req.headers.authorization || "";
+    if (!authHeaderRegex.test(authHeader)) {
+      return null;
+    }
+    const token = authHeader.replace(authHeaderRegex, "$1");
+    return { auth: decode(token) };
+  }
+});
 
 // ここから先はNext.jsが読みに行く領域
 export default apolloServer.createHandler({ path: "/api" });

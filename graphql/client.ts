@@ -19,31 +19,29 @@ const url = "http://localhost:3000";
 // } = createNetworkStatusNotifier();
 // export const NetworkStatusNotifierElement = NetworkStatusNotifier;
 
-// const uploadLink = createUploadLink({
-//   uri: `${url}/graphql`
-// });
+const uploadLink = createUploadLink({
+  uri: `${url}/api`
+});
 
-// const authLink = setContext((_, { headers }) => {
-//   const token = localStorage.getItem("token");
-//   return {
-//     headers: {
-//       ...headers,
-//       authorization: token ? `Bearer ${token}` : ""
-//     }
-//   };
-// });
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("token");
+  return {
+    headers: {
+      ...headers,
+      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdGFmZi5hcGkiLCJleHAiOjE1NzkxNDk1NjcsInN1YiI6IntcImlkXCI6NTAwNixcIm1hbmFnZW1lbnRPZmZpY2VJZFwiOjF9In0.GWmwzlkj9XhemQzvzON2JTcQP43sBBXe61OezL7UMqY`
+    }
+  };
+});
 
-// let apolloLinks = [];
+let apolloLinks = [];
 
-// if (process.env.NODE_ENV !== "production") {
-//   apolloLinks = [apolloLogger, authLink, uploadLink];
-// } else {
-//   apolloLinks = [authLink, uploadLink];
-// }
+if (process.env.NODE_ENV !== "production") {
+  apolloLinks = [apolloLogger, authLink, uploadLink];
+} else {
+  apolloLinks = [authLink, uploadLink];
+}
 
 export const client = new ApolloClient({
-  link: createUploadLink({
-    uri: `${url}/api`
-  }),
+  link: ApolloLink.from(apolloLinks),
   cache: new InMemoryCache()
 });
