@@ -1,7 +1,11 @@
 import { useUsersQuery } from "../gen/actions";
+import { useApolloNetworkStatus } from "react-apollo-network-status";
 
 function Home() {
+  const status = useApolloNetworkStatus();
   const { data, loading } = useUsersQuery();
+  if (status.queryError?.graphQLErrors.length > 0)
+    return <p>{status.queryError.graphQLErrors[0].message}</p>;
   if (loading) return <div>Welcome to Next.js!</div>;
 
   return (

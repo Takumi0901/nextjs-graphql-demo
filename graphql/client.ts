@@ -3,8 +3,6 @@ import "isomorphic-fetch";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
 import { setContext } from "apollo-link-context";
-// @ts-ignore
-import { createNetworkStatusNotifier } from "react-apollo-network-status";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { createUploadLink } from "apollo-upload-client";
 
@@ -12,12 +10,6 @@ import { createUploadLink } from "apollo-upload-client";
 import apolloLogger from "apollo-link-logger";
 
 const url = "http://localhost:3000";
-
-// const {
-//   NetworkStatusNotifier,
-//   link: networkStatusNotifierLink
-// } = createNetworkStatusNotifier();
-// export const NetworkStatusNotifierElement = NetworkStatusNotifier;
 
 const uploadLink = createUploadLink({
   uri: `${url}/api`

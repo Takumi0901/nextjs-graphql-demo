@@ -2,6 +2,7 @@ import React from "react";
 import App from "next/app";
 import { client } from "../graphql/client";
 import { ApolloProvider as ApolloHooksProvider } from "@apollo/react-hooks";
+import { ApolloNetworkStatusProvider } from "react-apollo-network-status";
 
 export default class MyApp extends App {
   static async getInitialProps({ Component, router, ctx }) {
@@ -19,7 +20,9 @@ export default class MyApp extends App {
 
     return (
       <ApolloHooksProvider client={client}>
-        <Component {...pageProps} />
+        <ApolloNetworkStatusProvider>
+          <Component {...pageProps} />
+        </ApolloNetworkStatusProvider>
       </ApolloHooksProvider>
     );
   }
